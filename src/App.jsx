@@ -1,52 +1,54 @@
-import { useEffect, useState } from 'react';
-import './App.css';
-import SpotifyIcon from './Components/SpotifyIcon';
+import { useEffect, useState } from "react";
+import "./App.css";
+import SpotifyIcon from "./Components/SpotifyIcon";
 
-const clientId = 'f65e53e58bc041df807f07afec02e5c3' 
-const clientSecret = "f35903e1ebb942b1b2eeaeb990cc1dac" 
+const clientId = "f65e53e58bc041df807f07afec02e5c3";
+const clientSecret = "f35903e1ebb942b1b2eeaeb990cc1dac";
 
 function App() {
-  const [accessToken, setAccessToken] = useState('');
-  const [value, setValue] = useState(''); 
+  const [accessToken, setAccessToken] = useState("");
+  const [value, setValue] = useState("");
   const [data, setData] = useState([]);
 
-//accses token
+  //accses token
   useEffect(() => {
     const authParameters = {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        Authorization: 'Basic ' + btoa(clientId + ':' + clientSecret),
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: "Basic " + btoa(clientId + ":" + clientSecret),
       },
-      body: 'grant_type=client_credentials',
+      body: "grant_type=client_credentials",
     };
-    fetch('https://accounts.spotify.com/api/token', authParameters)
+    fetch("https://accounts.spotify.com/api/token", authParameters)
       .then((resp) => resp.json())
       .then((resp) => setAccessToken(resp.access_token));
   }, []);
 
-//Searchi logika
+  //Searchi logika
   async function search() {
     const artistParameters = {
-      method: 'GET',
+      method: "GET",
       headers: {
-        Authorization: 'Bearer ' + accessToken,
+        Authorization: "Bearer " + accessToken,
       },
-    };  
-    const artistID = await fetch(`https://api.spotify.com/v1/search?q=${value}&type=artist`, artistParameters)
+    };
+    const artistID = await fetch(
+      `https://api.spotify.com/v1/search?q=${value}&type=artist`,
+      artistParameters
+    )
       .then((resp) => resp.json())
       .then((resp) => {
-        return resp.artists.items[0].id
-      });      
+        return resp.artists.items[0].id;
+      });
 
-      await fetch(
-        `https://api.spotify.com/v1/artists/${artistID}/albums?offset=0&limit=50&include_groups=album,single,compilation,appears_on`,
-        artistParameters
-    ).then((res)=>res.json())
-    .then((data)=>setData(data)
+    await fetch(
+      `https://api.spotify.com/v1/artists/${artistID}/albums?offset=0&limit=50&include_groups=album,single,compilation,appears_on`,
+      artistParameters
     )
+      .then((res) => res.json())
+      .then((data) => setData(data));
   }
-
 
   // useEffect(() => {
   //   if (!accessToken || !value) return; //Ardyoq ka tenc value
@@ -55,15 +57,14 @@ function App() {
   //     headers: {
   //       Authorization: 'Bearer ' + accessToken,
   //     },
-  //   };  
+  //   };
   //   fetch(`https://api.spotify.com/v1/search?q=${value}&type=artist`, artistParameters)
   //     .then((resp) => resp.json())
   //     .then((resp) => {
-  //       setData(resp.artists.items[0]); 
+  //       setData(resp.artists.items[0]);
   //     });
-  // }, [accessToken, value]); 
+  // }, [accessToken, value]);
   // console.log(data.items);
-  
 
   return (
     <div className="App">
@@ -72,19 +73,21 @@ function App() {
         value={value}
         onChange={(e) => setValue(e.target.value)}
       />
-      <button onClick={()=>{
-        search()
-      }}>Search</button>
-{
-        data.items?.map((e) => (
+      <button
+        onClick={() => {
+          if (value.trim()) {
+            search();
+          }
+        }}
+      >
+        Search
+      </button>
+      {data.items?.map(
+        (e) =>
           e.images.length > 0 && (
-            <SpotifyIcon
-              key={e.id}
-              imageUrl={e.images[0].url}
-              name={e.name}
-            />
+            <SpotifyIcon key={e.id} imageUrl={e.images[0].url} name={e.name} />
           )
-        ))}
+      )}
     </div>
   );
 }
