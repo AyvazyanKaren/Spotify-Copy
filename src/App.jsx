@@ -68,6 +68,7 @@ function App() {
 
   return (
     <div className="App">
+      
       <input
         type="search"
         value={value}
